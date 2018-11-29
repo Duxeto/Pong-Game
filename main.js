@@ -3,90 +3,63 @@ let ctx = cnv.getContext("2d");
 cnv.width = 1000;
 cnv.height = 800;
 
-
-
 // Global vars
-let X = 100;
-let Y = 100;
-let dx = 6;
-let dy = 6;
+let X = 500;
+let Y = 400;
+let dx = 7;
+let dy = 7;
 let paddleHeight = 20;
 let paddleWidth = 100;
 let paddleX = 0;
 let paddleX2 = 980;
-let paddleY = 200;
-let paddleY2 = 200;
+let paddleY = 300;
+let paddleY2 = 300;
 let rightPressed = false;
 let leftPressed = false;
 let rightPressed2 = false;
 let leftPressed2 = false;
 let score = 0;
-let score2 = 0
-let paused = false
+let score2 = 0;
+let level = 1;
+let gameStart = true;
 
 
-//Keys and pause func
-document.addEventListener("keydown", keyDownHandler, false);
-document.addEventListener("keyup", keyUpHandler, false);
-document.addEventListener("keydown", keyDownHandler2, false);
-document.addEventListener("keyup", keyUpHandler2, false);
-document.addEventListener("keydown", keyHandler);
 
-window.addEventListener('keydown',
-    function (event) {
-        let key = event.keyCode;
-        if (key === 80)// p key
-        {
-            togglePause();
-        }
-    });
-
-function keyHandler(event) {
-    if (event.code == "Space") {
-        clearRect();
-    }
-}
-
+//Keys
+document.addEventListener("keydown", keyDownHandler);
+document.addEventListener("keyup", keyUpHandler);
+document.addEventListener("keydown", keyDownHandler2);
+document.addEventListener("keyup", keyUpHandler2);
 function keyDownHandler(event) {
     if (event.code == "ArrowUp") {
-        rightPressed = true;
-    }
-    else if (event.code == "ArrowDown") {
-        leftPressed = true;
+        rightPressed2 = true;
+    } else if (event.code == "ArrowDown") {
+        leftPressed2 = true;
     }
 }
+
 function keyUpHandler(event) {
     if (event.code == "ArrowUp") {
-        rightPressed = false;
-    }
-    else if (event.code == "ArrowDown") {
-        leftPressed = false;
+        rightPressed2 = false;
+    } else if (event.code == "ArrowDown") {
+        leftPressed2 = false;
     }
 }
 
 function keyDownHandler2(event) {
     if (event.code == "KeyW") {
-        rightPressed2 = true;
-    }
-    else if (event.code == "KeyS") {
-        leftPressed2 = true;
+        rightPressed = true;
+    } else if (event.code == "KeyS") {
+        leftPressed = true;
     }
 }
+
 function keyUpHandler2(event) {
     if (event.code == "KeyW") {
-        rightPressed2 = false;
+        rightPressed = false;
+    } else if (event.code == "KeyS") {
+        leftPressed = false;
     }
-    else if (event.code == "KeyS") {
-        leftPressed2 = false;
-    }
-}
-function togglePause() {
-    if (!paused) {
-        paused = true;
-    } else if (paused) {
-        paused = false;
-    }
-
 }
 
 //Draw items on canvas
@@ -105,8 +78,8 @@ function drawPaddle() {
     ctx.fill();
     ctx.closePath();
 }
-function drawPaddle2() {
 
+function drawPaddle2() {
     ctx.beginPath();
     ctx.fillRect(paddleX2, paddleY2, paddleHeight, paddleWidth);
     ctx.fillStyle = "blue";
@@ -115,11 +88,31 @@ function drawPaddle2() {
 }
 
 function gameOver() {
-    if (score == 15 || score2 == 15) {
+    if (score2 == 10) {
+        dy = 0;
+        dx = 0;
+        rightPressed = false;
+        rightPressed2 = false;
+        leftPressed = false;
+        leftPressed2 = false;
+        ctx.font = "100px Arial";
+        ctx.fillStyle = "red";
+        ctx.fillText("Game Over!", 250, 400);
+    }
+}
+
+function gameWon() {
+    if (score == 10) {
+        dy = 0;
+        dx = 0;
+        rightPressed = false;
+        rightPressed2 = false;
+        leftPressed = false;
+        leftPressed2 = false;
         ctx.font = "100px Arial";
         ctx.fillStyle = "green";
-        ctx.fillText("Game Over", 250, 400)
-        togglePause();
+        ctx.fillText("Round Complete!", 130, 400);
+        level++;
     }
 }
 
@@ -131,9 +124,8 @@ function draw() {
     drawScore2();
     drawPaddle2();
     gameOver();
-    if (paused) {
-        update();
-    }
+    gameWon();
+
     // Score 
     if (X - 15 < 0) {
         score2++;
@@ -141,48 +133,52 @@ function draw() {
     if (X + 15 > cnv.width) {
         score++;
     }
-    
-
 
     // Collison detection paddle
-    if (X - 12 <= 25 && X - 12 > 20 && Y - 12 >= paddleY - 20 && Y - 12 <= paddleY + 80) {
+    if (X - 13.5 <= 25 && X - 13.5 > 20 && Y - 13.5 >= paddleY - 20 && Y - 12 <= paddleY + 100) {
         dx = -dx;
+        dy = Math.random() * 10 - 5;
     }
-    if (X + 13 >= cnv.width - 25 && Y + 13 >= paddleY2 && Y + 13 <= paddleY2 + 80) {
+    if (X + 13.5 >= cnv.width - 25 && Y + 13.5 >= paddleY2 && Y + 12 <= paddleY2 + 100) {
         dx = -dx;
+        dy = Math.random() * 10 - 5;
     }
 
     //Controls
     if (rightPressed) {
-        paddleY -= 7;
+        paddleY -= 9;
     } else if (leftPressed) {
-        paddleY += 7;
+        paddleY += 9;
     }
 
     if (rightPressed2) {
-        paddleY2 -= 7;
+        paddleY2 -= 9;
     } else if (leftPressed2) {
-        paddleY2 += 7;
+        paddleY2 += 9;
     }
 
     // Ball Physics
-    if (X - 15 < 0 || X + 15 > cnv.width) dx = -dx;
-    if (Y - 15 < 0 || Y + 15 > cnv.height) dy = -dy;
+    if (X - 15 < 0 || X + 15 > cnv.width) dx = -dx
 
+    if (Y - 15 < 0 || Y + 15 > cnv.height) dy = -dy;
 
     X += dx;
     Y += dy;
-}
 
+    //Levels
+
+
+    requestAnimationFrame(draw);
+}
 function drawScore() {
     ctx.font = "16px Arial";
     ctx.fillStyle = "red";
     ctx.fillText("Score: " + score, 8, 20);
 }
+
 function drawScore2() {
     ctx.font = "16px Arial";
     ctx.fillStyle = "blue";
     ctx.fillText("Score: " + score2, 920, 20);
 }
-
-setInterval(draw, 10);
+requestAnimationFrame(draw);
